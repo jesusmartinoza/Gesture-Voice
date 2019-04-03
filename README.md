@@ -1,4 +1,9 @@
-# sign-language-translator
+# Machine Learning Sign language translator
+Nowadays HCI are increasingly oriented to NLP, we have chatbots and virtual assistants that work with voice.
+
+Unfortunately, these technologies do not take into account people with vocal disabilities or aphonia.
+The proposal is a project to improve human-computer interaction through the translation of sign language, in which a video sequence of symbolic gestures with the hands is translated into written language.
+
 
 ## Project setup
 ```
