@@ -1,4 +1,4 @@
-# Machine Learning Sign language translator
+# Machine Learning for Sign Language translation
 Nowadays HCI are increasingly oriented to NLP, we have chatbots and virtual assistants that work with voice.
 
 Unfortunately, these technologies do not take into account people with vocal disabilities or aphonia.
