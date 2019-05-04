@@ -3,7 +3,25 @@
     <div class="container">
       <h1>Gesture Voice</h1>
 
-      <WebCam />
+      <WebCam
+        v-on:ready="loadingModel = false"
+        :active="webCamActive"
+      />
+
+      <p>
+        <b>{{status}}</b>
+      </p>
+
+      <v-btn
+         :loading="loadingModel"
+         :disabled="loadingModel"
+         color="primary"
+         depressed
+         @click="toggleVideo"
+       >
+        Iniciar traducción
+       </v-btn>
+
     </div>
   </div>
 </template>
@@ -16,7 +34,33 @@ export default {
   components: {
     WebCam
   },
+  data () {
+    return {
+      loader: null,
+      loadingModel: false,
+      webCamActive: false,
+      status: ""
+    }
+  },
   created: function() {
+  },
+  methods: {
+    toggleVideo() {
+      this.loadingModel = true;
+      this.webCamActive = true;
+      this.status = "Cargando modelo..."
+    }
+  },
+  watch: {
+    /*toggleVideo () {
+      // const l = this.loader
+      // this[l] = !this[l]
+      //
+      // setTimeout(() => (this[l] = false), 3000)
+      //
+      // this.loader = null
+
+    }*/
   }
 };
 </script>
