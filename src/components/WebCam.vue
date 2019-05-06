@@ -49,14 +49,18 @@ export default {
       model.detect(video).then(predictions => {
         if(predictions.length > 0) {
           console.log("Predictions: ", predictions);
-          vm.$emit('hand-detected', createImg(predictions[0].bbox));
+          vm.$emit('hand-detected', getHandData(predictions[0].bbox));
         }
 
         model.renderPredictions(predictions, canvas, context, video);
         requestAnimationFrame(this.runDetection);
       });
 
-      function createImg(bbox) {
+      /**
+       * Get hand area from canvas
+       * and then extract pixel data.
+       */
+      function getHandData(bbox) {
         var canvasImg = document.createElement('canvas');
         var ctxImg = canvasImg.getContext("2d");
         var img = document.createElement("img");
@@ -78,9 +82,9 @@ export default {
 
         img.width = canvasImg.width;
         img.height = canvasImg.height;
-        img.setAttribute("src", canvasImg.toDataURL());
+        //img.setAttribute("src", canvasImg.toDataURL());
 
-        return canvasImg;
+        return ctxImg.getImageData(0, 0, canvasImg.width, canvasImg.height);
       }
     },
 

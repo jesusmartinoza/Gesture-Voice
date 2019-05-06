@@ -75,14 +75,41 @@ export default {
       this.buttonText = "Pausar traducción";
     },
 
-    drawHand(imgHand) {
-      console.log(imgHand)
+    /**
+     * Get image data from WebCam module.
+
+     * Pass image data to TF and predict word/character.
+     */
+    drawHand(handData) {
+
       var lastTrack = this.$refs.lastTrack;
       var ctx = lastTrack.getContext("2d");
 
-      lastTrack.height = imgHand.height;
-      lastTrack.width = imgHand.width;
-      ctx.drawImage(imgHand, 0, 0, imgHand.width, imgHand.height);
+      lastTrack.height = handData.height;
+      lastTrack.width = handData.width;
+
+      // Resize image to 128x128
+      var scaledImageData = scaleImageData(ctx, handData, 128, 128);
+      ctx.putImageData(scaledImageData, 0, 0);
+
+      /**
+       * Scale image data to desired size;
+       * Normally used to generate a constant image size(Width x Height)
+       */
+      function scaleImageData(ctx, imageData, desiredWidth, desiredHeight) {
+          var newCanvas = document.createElement('canvas');
+          var scaleWidth = 1 / (imageData.width / desiredWidth);
+          var scaleHeight =  1 / (imageData.height / desiredHeight);
+
+          newCanvas.width = imageData.width;
+          newCanvas.height = imageData.height;
+
+          newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+          ctx.scale(scaleWidth, scaleHeight);
+          ctx.drawImage(newCanvas, 0, 0)
+
+          return ctx.getImageData(0, 0, desiredWidth, desiredHeight);
+      }
     }
   }
 };
