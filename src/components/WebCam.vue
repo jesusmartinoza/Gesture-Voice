@@ -36,13 +36,14 @@ export default {
       model.detect(video).then(predictions => {
           //console.log("Predictions: ", predictions);
           model.renderPredictions(predictions, canvas, context, video);
-          requestAnimationFrame(runDetection);
+          requestAnimationFrame(this.runDetection);
       });
     }
   },
 
   watch: {
     active() {
+      var vm = this;
       console.log("Loading model...")
 
       // Load the model.
@@ -50,12 +51,13 @@ export default {
           // detect objects in the image.
           model = lmodel
           console.log("Model loaded")
+          vm.$emit('model-loaded');
 
           handTrack.startVideo(video).then(function (status) {
               console.log("video started", status);
               if (status) {
                   //updateNote.innerText = "Video started. Now tracking"
-                  this.runDetection()
+                  vm.runDetection()
               } else {
                   //updateNote.innerText = "Please enable video"
               }

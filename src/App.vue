@@ -1,14 +1,15 @@
 <template>
-  <div id="app">
+  <v-app id="app">
     <div class="container">
       <h1>Gesture Voice</h1>
 
       <WebCam
         v-on:ready="loadingModel = false"
+        v-on:model-loaded="modelLoaded"
         :active="webCamActive"
       />
 
-      <p>
+      <p class="status">
         <b>{{status}}</b>
       </p>
 
@@ -19,11 +20,11 @@
          depressed
          @click="toggleVideo"
        >
-        Iniciar traducción
+        {{buttonText}}
        </v-btn>
 
     </div>
-  </div>
+  </v-app>
 </template>
 
 <script>
@@ -39,6 +40,7 @@ export default {
       loader: null,
       loadingModel: false,
       webCamActive: false,
+      buttonText: "Iniciar traducción",
       status: ""
     }
   },
@@ -46,9 +48,21 @@ export default {
   },
   methods: {
     toggleVideo() {
-      this.loadingModel = true;
+      if(this.webCamActive) {
+        this.webCamActive = false;
+        this.status = "Traducción pausada";
+      } else {
+        this.loadingModel = true;
+        this.webCamActive = true;
+        this.status = "Cargando modelo..."
+      }
+    },
+
+    modelLoaded() {
+      this.loadingModel = false;
       this.webCamActive = true;
-      this.status = "Cargando modelo..."
+      this.status = "Traducción en progreso";
+      this.buttonText = "Pausar traducción";
     }
   },
   watch: {
@@ -75,6 +89,7 @@ html, .body {
 
 h1 {
   font-weight: bold;
+  margin-bottom: 1em;
 }
 
 .container {
@@ -86,5 +101,9 @@ h1 {
   padding: 1em;
   text-align: center;
   width: 85%;
+}
+
+.status {
+  margin-top: 1em;
 }
 </style>
