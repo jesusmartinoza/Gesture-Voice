@@ -1,12 +1,12 @@
 <template>
   <v-app id="app">
-    <div class="container">
+    <div class="app-container">
       <h1>Gesture Voice</h1>
 
       <WebCam
         v-on:ready="loadingModel = false"
         v-on:model-loaded="modelLoaded"
-        :active="webCamActive"
+        :active="webCamActivated"
       />
 
       <p class="status">
@@ -14,14 +14,17 @@
       </p>
 
       <v-btn
-         :loading="loadingModel"
-         :disabled="loadingModel"
-         color="primary"
-         depressed
-         @click="toggleVideo"
-       >
+       :loading="loadingModel"
+       :disabled="loadingModel"
+       color="primary"
+       depressed
+       @click="toggleVideo">
         {{buttonText}}
        </v-btn>
+
+       <div>
+         <canvas id="last-track" ref="lastTrack"></canvas>
+       </div>
 
     </div>
   </v-app>
@@ -39,7 +42,7 @@ export default {
     return {
       loader: null,
       loadingModel: false,
-      webCamActive: false,
+      webCamActivated: false,
       buttonText: "Iniciar traducción",
       status: ""
     }
@@ -47,40 +50,38 @@ export default {
   created: function() {
   },
   methods: {
+    /**
+     * Toggle {webCamActivated} and handle result
+     */
     toggleVideo() {
-      if(this.webCamActive) {
-        this.webCamActive = false;
+      if(this.webCamActivated) {
         this.status = "Traducción pausada";
+        this.buttonText = "Iniciar traducción";
       } else {
         this.loadingModel = true;
-        this.webCamActive = true;
-        this.status = "Cargando modelo..."
+        this.status = "Cargando modelo...";
       }
+      this.webCamActivated = !this.webCamActivated;
     },
 
+    /**
+     * Triggered when WebCam component is loaded
+     */
     modelLoaded() {
       this.loadingModel = false;
-      this.webCamActive = true;
+      this.webCamActivated = true;
       this.status = "Traducción en progreso";
       this.buttonText = "Pausar traducción";
     }
-  },
-  watch: {
-    /*toggleVideo () {
-      // const l = this.loader
-      // this[l] = !this[l]
-      //
-      // setTimeout(() => (this[l] = false), 3000)
-      //
-      // this.loader = null
-
-    }*/
   }
 };
 </script>
 
 <style>
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,700');
+
+ /* Set vuetify background color */
+.theme--light.application { background: #DADFF2 !important; }
 
 html, .body {
   background-color: #DADFF2;
@@ -92,12 +93,12 @@ h1 {
   margin-bottom: 1em;
 }
 
-.container {
+.app-container {
   background-color: white;
   border-radius: 1.5em;
   box-shadow: 0px 0px 16px #BEC1D6;
-  height: 90vh;
-  margin: 1em auto;
+  min-height: 90vh;
+  margin: 2em auto;
   padding: 1em;
   text-align: center;
   width: 85%;
@@ -105,5 +106,11 @@ h1 {
 
 .status {
   margin-top: 1em;
+}
+
+#last-track {
+  background-color: red;
+  height: 200px;
+  width: 200px;
 }
 </style>

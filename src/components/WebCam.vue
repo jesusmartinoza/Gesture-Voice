@@ -13,9 +13,9 @@ var context;
 
 const modelParams = {
     flipHorizontal: true,   // flip for video
-    maxNumBoxes: 20,        // maximum number of boxes to detect
+    maxNumBoxes: 2,        // maximum number of boxes to detect
     iouThreshold: 0.5,      // ioU threshold for non-max suppression
-    scoreThreshold: 0.7,    // confidence threshold for predictions.
+    scoreThreshold: 0.85,    // confidence threshold for predictions.
 }
 
 export default {
@@ -23,46 +23,81 @@ export default {
   components: {
   },
   props: ['active'],
+
+  // When UI mounted then init variables
   mounted: function() {
     canvas = this.$refs.canvas;
     context = canvas.getContext("2d");
     video = this.$refs.video;
+
+    // Set canvas
+    context.fillStyle = "#FAFBFF";
+    context.fillRect(0, 0, canvas.width, canvas.height);
   },
   created: function() {
   },
 
   methods: {
+    /**
+     * Start hand tracking detection.
+
+     * When a hand is detected then put the prediction
+     * on the queue
+     */
     runDetection() {
       model.detect(video).then(predictions => {
-          //console.log("Predictions: ", predictions);
-          model.renderPredictions(predictions, canvas, context, video);
-          requestAnimationFrame(this.runDetection);
+        if(predictions.length > 0)
+          console.log("Predictions: ", predictions);
+
+        model.renderPredictions(predictions, canvas, context, video);
+        requestAnimationFrame(this.runDetection);
+      });
+    },
+
+    /**
+     * Start video stream on canvas
+     */
+    startVideo() {
+      var vm = this;
+
+      handTrack.startVideo(video).then(function (status) {
+        console.log("Video started", status);
+        if (status) {
+          vm.runDetection()
+        }
       });
     }
   },
 
   watch: {
+    /**
+     * Handle {active} prop.
+
+     * Load model, start/stop video according to the property.
+     */
     active() {
       var vm = this;
-      console.log("Loading model...")
 
-      // Load the model.
-      handTrack.load(modelParams).then(lmodel => {
-          // detect objects in the image.
-          model = lmodel
-          console.log("Model loaded")
-          vm.$emit('model-loaded');
+      if(this.active) {
+        console.log("Loading model...")
 
-          handTrack.startVideo(video).then(function (status) {
-              console.log("video started", status);
-              if (status) {
-                  //updateNote.innerText = "Video started. Now tracking"
-                  vm.runDetection()
-              } else {
-                  //updateNote.innerText = "Please enable video"
-              }
+        if(model == null) {
+          // Load the model.
+          handTrack.load(modelParams).then(lmodel => {
+            console.log("Model loaded");
+            // detect objects in the image.
+            model = lmodel;
+            vm.$emit('model-loaded');
+            vm.startVideo();
           });
-      });
+        } else {
+          vm.$emit('model-loaded');
+          vm.startVideo();
+        }
+      } else {
+        handTrack.stopVideo(video)
+        context.fillRect(0, 0, canvas.width, canvas.height);
+      }
     }
   }
 };
@@ -75,7 +110,7 @@ video {
 
 canvas {
   border-radius: 16px;
-  height: 300px;
-  width: 400px;
+  height: calc(100% * .75);
+  width: 90%;
 }
 </style>
