@@ -6,6 +6,7 @@
       <WebCam
         v-on:ready="loadingModel = false"
         v-on:model-loaded="modelLoaded"
+        v-on:hand-detected="drawHand"
         :active="webCamActivated"
       />
 
@@ -72,6 +73,16 @@ export default {
       this.webCamActivated = true;
       this.status = "Traducción en progreso";
       this.buttonText = "Pausar traducción";
+    },
+
+    drawHand(imgHand) {
+      console.log(imgHand)
+      var lastTrack = this.$refs.lastTrack;
+      var ctx = lastTrack.getContext("2d");
+
+      lastTrack.height = imgHand.height;
+      lastTrack.width = imgHand.width;
+      ctx.drawImage(imgHand, 0, 0, imgHand.width, imgHand.height);
     }
   }
 };
@@ -109,8 +120,7 @@ h1 {
 }
 
 #last-track {
-  background-color: red;
-  height: 200px;
-  width: 200px;
+  max-height: 200px;
+  max-width: 200px;
 }
 </style>

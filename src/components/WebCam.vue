@@ -41,17 +41,47 @@ export default {
     /**
      * Start hand tracking detection.
 
-     * When a hand is detected then put the prediction
-     * on the queue
+     * When a hand is detected then emit the prediction image.
      */
     runDetection() {
+      var vm = this;
+
       model.detect(video).then(predictions => {
-        if(predictions.length > 0)
+        if(predictions.length > 0) {
           console.log("Predictions: ", predictions);
+          vm.$emit('hand-detected', createImg(predictions[0].bbox));
+        }
 
         model.renderPredictions(predictions, canvas, context, video);
         requestAnimationFrame(this.runDetection);
       });
+
+      function createImg(bbox) {
+        var canvasImg = document.createElement('canvas');
+        var ctxImg = canvasImg.getContext("2d");
+        var img = document.createElement("img");
+
+        canvasImg.width = bbox[2];
+        canvasImg.height = bbox[3];
+
+        ctxImg.drawImage(
+          canvas,
+          bbox[0], // x
+          bbox[1], // y
+          bbox[2], // width
+          bbox[3], // height
+          0,
+          0,
+          bbox[2],
+          bbox[3]
+        );
+
+        img.width = canvasImg.width;
+        img.height = canvasImg.height;
+        img.setAttribute("src", canvasImg.toDataURL());
+
+        return canvasImg;
+      }
     },
 
     /**
