@@ -35,6 +35,7 @@
 
 <script>
 import WebCam from './components/WebCam.vue';
+
 var model = null;
 var letters = [
   "A", "B", "C", "D", "E", "F",
