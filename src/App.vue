@@ -23,6 +23,8 @@
         {{buttonText}}
        </v-btn>
 
+       <h1>{{predictedSentence}}</h1>
+
        <div>
          <canvas id="last-track" ref="lastTrack"></canvas>
        </div>
@@ -32,7 +34,14 @@
 </template>
 
 <script>
-import WebCam from './components/WebCam.vue'
+import WebCam from './components/WebCam.vue';
+var model = null;
+var letters = [
+  "A", "B", "C", "D", "E", "F",
+  "G", "H", "I", "J", "K", "L",
+  "M", "N", "O", "P", "Q", "R",
+  "S", "T", "U", "V", "W", "X",
+  "Y", "Z"]
 
 export default {
   name: "App",
@@ -45,10 +54,15 @@ export default {
       loadingModel: false,
       webCamActivated: false,
       buttonText: "Iniciar traducción",
-      status: ""
+      status: "",
+      predictedSentence: "",
+      predicting: false
     }
   },
   created: function() {
+  },
+  mounted: async function() {
+    model = await tf.loadLayersModel('/model.json');
   },
   methods: {
     /**
@@ -77,20 +91,54 @@ export default {
 
     /**
      * Get image data from WebCam module.
-
      * Pass image data to TF and predict word/character.
      */
     drawHand(handData) {
-
       var lastTrack = this.$refs.lastTrack;
       var ctx = lastTrack.getContext("2d");
+      var vm = this;
 
       lastTrack.height = handData.height;
       lastTrack.width = handData.width;
 
-      // Resize image to 128x128
-      var scaledImageData = scaleImageData(ctx, handData, 128, 128);
+      // Resize image to 28x28
+      var scaledImageData = scaleImageData(ctx, handData, 28, 28);
       ctx.putImageData(scaledImageData, 0, 0);
+
+      predict(scaledImageData);
+
+      /**
+       * Sum RGB pixels and divided in 3 to get the average color
+       */
+      function toGrayPixels(imageData) {
+        var pixels = [];
+
+        for (var i = 0, n = imageData.data.length; i < n; i += 4) {
+          var gray = imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2];
+          pixels.push(gray / 3);
+        }
+
+        return pixels;
+      }
+
+      /**
+       * Use tensorflow to predict which letter is in image
+       */
+      function predict(imageData) {
+        if(!vm.predicting) {
+          vm.predicting = true;
+          var data = toGrayPixels(imageData).map(x => x / 255.0);
+          var tensor = tf.tensor2d(data, [1, 784]).reshape([1, 784, 1])
+
+          const prediction = model.predict(tensor);
+          var max = tf.max(prediction).dataSync()[0]
+
+          if(max > 0.85)
+            console.log(`Letter: ${letters[tf.argMax(prediction, 1).dataSync()[0]]}, Score: ${max}`);
+
+          vm.predicting = false;
+        }
+      }
 
       /**
        * Scale image data to desired size;

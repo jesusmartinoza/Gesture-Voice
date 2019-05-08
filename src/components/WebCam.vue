@@ -13,9 +13,9 @@ var context;
 
 const modelParams = {
     flipHorizontal: true,   // flip for video
-    maxNumBoxes: 2,        // maximum number of boxes to detect
-    iouThreshold: 0.5,      // ioU threshold for non-max suppression
-    scoreThreshold: 0.85,    // confidence threshold for predictions.
+    maxNumBoxes: 1,        // maximum number of boxes to detect
+    iouThreshold: 0.7,      // ioU threshold for non-max suppression
+    scoreThreshold: 0.8,    // confidence threshold for predictions.
 }
 
 export default {
@@ -48,7 +48,7 @@ export default {
 
       model.detect(video).then(predictions => {
         if(predictions.length > 0) {
-          console.log("Predictions: ", predictions);
+          //console.log("Predictions: ", predictions);
           vm.$emit('hand-detected', getHandData(predictions[0].bbox));
         }
 
